@@ -38,7 +38,6 @@ parseTable = map words
 -- * Exercise 2
 printLine :: [Int] -> String
 
--- printLine xs = intercalate (replicate (maximum xs) '-') (replicate 2 "+")
 printLine [] = ['+']
 printLine (x : xs) = ['+'] ++ replicate x '-' ++ printLine xs
 
@@ -68,29 +67,36 @@ dataTable = [["first","last","gender","salary"],
              ["Eve","Evans","female","275000"]]
 
 columnWidths :: Table -> [Int]
-columnWidths table = map maximum ((map (map length)) (transpose table))
+columnWidths table = map (maximum . map length) (transpose table)
 
 -- * Exercise 6
-
--- printTable :: Table -> [String]
+printTable :: Table -> [String]
 printTable table@(header:rows)
-    = putStr (unlines
-        (   [printLine (columnWidths table)] ++
-            [printRow (zip (columnWidths table) ((map (map toUpper)) header))] ++
-            [printLine (columnWidths table)] ++
-            map printRow (map (zip (columnWidths dataTable)) rows) ++
-            [printLine (columnWidths table)]
-        ))
+    =   
+        [printLine (columnWidths table)] ++
+        [printRow (zip (columnWidths table) ((map (map toUpper)) header))] ++
+        [printLine (columnWidths table)] ++
+        map (printRow . zip (columnWidths dataTable)) rows ++
+        [printLine (columnWidths table)]
+
 -- | Querying
 
 -- * Exercise 7
-
 select :: Field -> Field -> Table -> Table
 select column value table@(header:rows)
-    = undefined
+    = if isNothing (elemIndex column header)
+        then 
+            table
+        else
+            let 
+                appendToList :: Table -> Table
+                appendToList [] = []
+                appendToList (x : xs) 
+                    | x!!(fromMaybe (-1) (elemIndex column header)) == value = [x] ++ appendToList xs
+                    | otherwise = appendToList xs
+            in header : appendToList rows
 
 -- * Exercise 8
-
-project :: [Field] -> Table -> Table
-project columns table@(header:_)
-    = undefined
+-- project :: [Field] -> Table -> Table
+-- project columns table@(header:_)
+--     = map columns
