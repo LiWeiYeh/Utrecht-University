@@ -18,14 +18,14 @@ type Table = [Row]
 
 
 main :: IO ()
-main = putStrLn "hello world"
--- main = interact (unlines . exercise . lines)
+-- main = putStrLn "hello world"
+main = interact (unlines . exercise . lines)
 
--- exercise :: [String] -> [String]
--- exercise = printTable
---          . project ["last", "first", "salary"]
---          . select "gender" "male"
---          . parseTable
+exercise :: [String] -> [String]
+exercise = printTable
+         . project ["last", "first", "salary"]
+         . select "gender" "male"
+         . parseTable
 
 -- | Parsing
 
@@ -92,11 +92,19 @@ select column value table@(header:rows)
                 appendToList :: Table -> Table
                 appendToList [] = []
                 appendToList (x : xs) 
-                    | x!!(fromMaybe (-1) (elemIndex column header)) == value = [x] ++ appendToList xs
+                    | x!!(fromMaybe (-1) (elemIndex column header)) == value = x : appendToList xs
                     | otherwise = appendToList xs
             in header : appendToList rows
 
 -- * Exercise 8
--- project :: [Field] -> Table -> Table
--- project columns table@(header:_)
---     = map columns
+project :: [Field] -> Table -> Table
+project columns table@(header:_)
+    =   
+        let 
+            appendToList [] transposedTable = []
+            appendToList (x:xs) transposedTable = transposedTable!!x : appendToList xs transposedTable
+        in
+            transpose (appendToList indices transposedTable)
+        where
+            indices = mapMaybe (`elemIndex` header) columns
+            transposedTable = transpose table
