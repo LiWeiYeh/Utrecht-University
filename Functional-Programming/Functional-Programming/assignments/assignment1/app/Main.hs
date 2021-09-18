@@ -43,8 +43,8 @@ printLine (x : xs) = "+" ++ replicate x '-' ++ printLine xs
 -- * Exercise 3
 printField :: Int -> String -> String
 printField num [] = []
-printField num word | all isDigit word = replicate (num - (length word)) ' ' ++ word
-                    | otherwise = word ++ replicate (num - (length word)) ' '
+printField num word | all isDigit word = replicate (num - length word) ' ' ++ word
+                    | otherwise = word ++ replicate (num - length word) ' '
 
 -- * Exercise 4
 dataRow :: [(Int, String)]
@@ -70,7 +70,7 @@ printTable :: Table -> [String]
 printTable table@(header:rows) 
     =   
         [printLine (columnWidths table)] ++
-        [printRow (zip (columnWidths table) ((map (map toUpper)) header))] ++
+        [printRow (zip (columnWidths table) (map (map toUpper) header))] ++
         [printLine (columnWidths table)] ++
         map (printRow . zip (columnWidths table)) rows ++
         [printLine (columnWidths table)]
@@ -81,7 +81,7 @@ printTable table@(header:rows)
 select :: Field -> Field -> Table -> Table
 select column value table@(header:rows)
     | isNothing (elemIndex column header) = table
-    | otherwise = [header] ++ filter (\x -> x!!(fromMaybe (-1) (elemIndex column header)) == value) (rows)
+    | otherwise = header : filter (\x -> x!!fromMaybe (-1) (elemIndex column header) == value) rows
 
 -- * Exercise 8
 project :: [Field] -> Table -> Table
