@@ -18,7 +18,6 @@ type Table = [Row]
 
 
 main :: IO ()
--- main = putStrLn "hello world"
 main = interact (unlines . exercise . lines)
 
 exercise :: [String] -> [String]
@@ -38,24 +37,21 @@ parseTable = map words
 -- * Exercise 2
 printLine :: [Int] -> String
 
-printLine [] = ['+']
-printLine (x : xs) = ['+'] ++ replicate x '-' ++ printLine xs
+printLine [] = "+"
+printLine (x : xs) = "+" ++ replicate x '-' ++ printLine xs
 
 -- * Exercise 3
 printField :: Int -> String -> String
 printField num [] = []
-printField num word = if (all isDigit word)
-                        then 
-                            replicate (num - (length word)) ' ' ++ word
-                        else
-                            word ++ replicate (num - (length word)) ' '
+printField num word | all isDigit word = replicate (num - (length word)) ' ' ++ word
+                    | otherwise = word ++ replicate (num - (length word)) ' '
+
 -- * Exercise 4
 dataRow :: [(Int, String)]
 dataRow = [(5, "Alice"), (6, "Allen"), (6, "female"), (6, "82000")]
-               
+
 printRow :: [(Int, String)] -> String
-printRow [] = ['|']
-printRow (x : xs) = ['|'] ++ uncurry printField x ++ printRow xs
+printRow xs = "|" ++ intercalate "|" (map (uncurry printField) xs) ++ "|"
 
 -- * Exercise 5
 dataTable :: Table
@@ -71,40 +67,27 @@ columnWidths table = map (maximum . map length) (transpose table)
 
 -- * Exercise 6
 printTable :: Table -> [String]
-printTable table@(header:rows)
+printTable table@(header:rows) 
     =   
         [printLine (columnWidths table)] ++
         [printRow (zip (columnWidths table) ((map (map toUpper)) header))] ++
         [printLine (columnWidths table)] ++
-        map (printRow . zip (columnWidths dataTable)) rows ++
+        map (printRow . zip (columnWidths table)) rows ++
         [printLine (columnWidths table)]
 
--- | Querying
+-- -- | Querying
 
 -- * Exercise 7
 select :: Field -> Field -> Table -> Table
 select column value table@(header:rows)
-    = if isNothing (elemIndex column header)
-        then 
-            table
-        else
-            let 
-                appendToList :: Table -> Table
-                appendToList [] = []
-                appendToList (x : xs) 
-                    | x!!(fromMaybe (-1) (elemIndex column header)) == value = x : appendToList xs
-                    | otherwise = appendToList xs
-            in header : appendToList rows
+    | isNothing (elemIndex column header) = table
+    | otherwise = [header] ++ filter (\x -> x!!(fromMaybe (-1) (elemIndex column header)) == value) (rows)
 
 -- * Exercise 8
 project :: [Field] -> Table -> Table
 project columns table@(header:_)
     =   
-        let 
-            appendToList [] transposedTable = []
-            appendToList (x:xs) transposedTable = transposedTable!!x : appendToList xs transposedTable
-        in
-            transpose (appendToList indices transposedTable)
+        transpose (map (transposedTable!!) indices) 
         where
             indices = mapMaybe (`elemIndex` header) columns
             transposedTable = transpose table
