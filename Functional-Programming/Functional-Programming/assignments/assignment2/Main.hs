@@ -140,11 +140,44 @@ printLine = "-+-+-"
 -- Exercise 8
              
 moves :: Player -> Board -> [Board]
-moves p (r1,r2,r3) = undefined
-
-
-        
-
+moves p (r1,r2,r3) = func 1 r1 ++
+                     func 2 r1 ++
+                     func 3 r1 ++
+                     func 4 r2 ++ 
+                     func 5 r2 ++ 
+                     func 6 r2 ++
+                     func 7 r3 ++
+                     func 8 r3 ++
+                     func 9 r3
+                        where 
+                            func x (c1,c2,c3) | x == 1 = if c1 == B 
+                                                         then [((sign,c2,c3),r2,r3)]
+                                                         else []
+                                              | x == 2 = if c2 == B 
+                                                         then [((c1,sign,c3),r2,r3)]
+                                                         else []
+                                              | x == 3 = if c3 == B 
+                                                         then [((c1,c2,sign),r2,r3)]
+                                                         else []
+                                              | x == 4 = if c1 == B 
+                                                         then [(r1,(sign,c2,c3),r3)]
+                                                         else []
+                                              | x == 5 = if c2 == B 
+                                                         then [(r1,(c2,sign,c3),r3)]
+                                                         else []
+                                              | x == 6 = if c3 == B 
+                                                         then [(r1,(c1,c2,sign),r3)]
+                                                         else []
+                                              | x == 7 = if c1 == B 
+                                                         then [(r1,r2,(sign,c2,c3))]
+                                                         else []
+                                              | x == 8 = if c2 == B 
+                                                         then [(r1,r2,(c1,sign,c3))]
+                                                         else []
+                                              | x == 9 = if c3 == B 
+                                                         then [(r1,r2,(c1,c2,sign))]
+                                                         else []
+                            sign = symbol p
 
 -- | Gametree generation
 
