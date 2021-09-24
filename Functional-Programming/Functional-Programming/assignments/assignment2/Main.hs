@@ -8,7 +8,7 @@
 
 -}
 
-module Main where -- Rename to "Main" if you want to compile the game.
+module Assignment2 where -- Rename to "Main" if you want to compile the game.
                          -- Don't forget to rename it back when submitting!
 
 import Control.Monad
@@ -24,28 +24,36 @@ import System.IO
 data Rose a = MkRose a [Rose a]
     deriving (Eq, Show)
 
-exampleRose :: Num a => Rose a
-exampleRose = MkRose 1 [
-    MkRose 2 [MkRose 3 [MkRose 4 []]], MkRose 5 [MkRose 6 [MkRose 7 []]]]
+exampleRose =   MkRose 1
+                [
+                    MkRose 2 
+                        [
+                            MkRose 3 [], 
+                            MkRose 6 []
+                        ], 
+                    MkRose 4 
+                        [
+                            MkRose 5 []
+                        ]
+                ]
 
 -- Exercise 1
 
 root :: Rose a -> a
-root (MkRose a []) = a
-root (MkRose a [child]) = root child
+root (MkRose x _) = x
 
 children :: Rose a -> [Rose a]
-children (MkRose a []) = []
-children (MkRose _ [child]) = [child]
+children (MkRose _ children) = children
 
 -- Exercise 2
 
 size :: Rose a -> Int
-size (MkRose _ []) = 1
-size (MkRose _ [child]) = 1 + size child
+size (MkRose value []) = 1
+size (MkRose value children) = 1 + sum (map size children)
 
 leaves :: Rose a -> Int
-leaves = undefined
+leaves (MkRose value []) = 1
+leaves (MkRose value children) = sum (map leaves children)
 
 -- | State representation
 
@@ -59,9 +67,10 @@ instance Show Player where
     show P2 = "Player 2"
     
 -- Exercise 3
-    
+
 nextPlayer :: Player -> Player
-nextPlayer = undefined
+nextPlayer P1 = P2
+nextPlayer P2 = P1
 
 -- * Board
 
@@ -76,42 +85,73 @@ instance Show Field where
 -- Exercise 4
 
 symbol :: Player -> Field
-symbol = undefined
+symbol P1 = X
+symbol P2 = O
 
 type Row   = (Field, Field, Field)
 type Board = (Row, Row, Row)
 
+exampleBoard = (
+    (X, B, B),
+    (O, O, B),
+    (B, B, X))
+
 -- Exercise 5
 
 verticals :: Board -> (Row, Row, Row)
-verticals = undefined
+verticals ((r1c1,r1c2,r1c3), 
+           (r2c1,r2c2,r2c3),
+           (r3c1,r3c2,r3c3)) = ((r1c1,r2c1,r3c1),
+                                (r1c2,r2c2,r3c2),
+                                (r1c3,r2c3,r3c3))
 
 diagonals :: Board -> (Row, Row)
-diagonals = undefined
+diagonals ((r1c1,_   ,r1c3), 
+           (_   ,r2c2,_   ),
+           (r3c1,_   ,r3c3)) = ((r1c1,r2c2,r3c3),
+                                (r1c3,r2c2,r3c1))
 
 -- Exercise 6
 
 emptyBoard :: Board
-emptyBoard = undefined
+emptyBoard = ((B, B, B),
+              (B, B, B),
+              (B, B, B))
 
 -- Exercise 7
 
 printBoard :: Board -> String
-printBoard = undefined
+printBoard (r1, 
+            r2,
+            r3) = printRow (r1) ++ "\n" ++ 
+                  printLine ++ "\n" ++
+                  printRow (r2) ++ "\n" ++ 
+                  printLine ++ "\n" ++
+                  printRow (r3) ++ "\n" ++ 
+                  printLine
+
+printRow :: Row -> String
+printRow (c1, c2, c3) = show c1 ++ "|" ++ show c2 ++ "|" ++ show c3
+printLine :: String
+printLine = "-+-+-"
 
 -- | Move generation
              
 -- Exercise 8
              
 moves :: Player -> Board -> [Board]
-moves = undefined
+moves p (r1,r2,r3) = undefined
+
+
+        
+
 
 -- | Gametree generation
 
 -- Exercise 9
 
 hasWinner :: Board -> Maybe Player
-hasWinner = undefined
+hasWinner board = undefined
 
 -- Exercise 10
 
