@@ -3,6 +3,8 @@ module Main where
 import Lib
 
 import Data.Foldable
+import Data.List
+
 main :: IO ()
 main = putStrLn "hello world"
 
@@ -32,10 +34,10 @@ mapp :: (a -> b) -> [a] -> [b]
 mapp _ [] = []
 mapp f (x:xs) = f x : mapp f xs
 
-intersperse :: Char -> [Char] -> [Char]
-intersperse sep [] = []
-intersperse sep [a] = [a]
-intersperse sep (x:xs) = x : sep : intersperse sep xs
+interspersee :: Char -> [Char] -> [Char]
+interspersee sep [] = []
+interspersee sep [a] = [a]
+interspersee sep (x:xs) = x : sep : interspersee sep xs
 
 concatMapp :: (a -> [b]) -> [a] -> [b]
 concatMapp f xs = concatt (mapp f xs)
@@ -63,15 +65,15 @@ partitionn p (x:xs) | p x =       let (ts, fs) = partitionn p xs in (x:ts, fs)
 -- unzipp [] = ([],[])
 -- unzipp (x:xs) = (fst x : unzipp xs, snd x : unzipp xs)
 
-insert :: Ord a => a -> [a] -> [a]
-insert n [] = [n]
-insert n (x:xs) | n <= x = n : (x:xs)
-                | otherwise = x : insert n xs
+insertt :: Ord a => a -> [a] -> [a]
+insertt n [] = [n]
+insertt n (x:xs) | n <= x = n : (x:xs)
+                | otherwise = x : insertt n xs
 
 sortt :: Ord a => [a] -> [a]
 sortt [] = []
 sortt [a] = [a]
-sortt (x:xs) =  insert x (sortt xs)
+sortt (x:xs) =  insertt x (sortt xs)
 
 takee :: Int -> [a] -> [a]
 takee _ [] = []
@@ -129,9 +131,9 @@ insertEverywhere x [] = [[x]]
 insertEverywhere x xs@(y:ys) = (x:xs) : map (y:) (insertEverywhere x ys)
 
 -- TODO: how does concatMap work here?
-permutations :: [a] -> [[a]]
-permutations [] = [[]]
-permutations (x:xs) = concatMapp (insertEverywhere x) (permutations xs)
+permutationss :: [a] -> [[a]]
+permutationss [] = [[]]
+permutationss (x:xs) = concatMapp (insertEverywhere x) (permutationss xs)
 
 foldrr :: (a -> b -> b) -> b -> [a] -> b
 foldrr f z [] = z
@@ -156,9 +158,6 @@ decodee xs = concatMap (\(i,x) -> replicatee i x) xs
                     replicatee 0 _ = []
                     replicatee i x = x: replicatee (i-1) x
 
-
-
-
 splitAtt :: Int -> [a] -> ([a],[a])
 splitAtt 0 xs = ([], xs)
 splitAtt i [] = ([], [])
@@ -169,5 +168,26 @@ splitAlll :: Int -> [a] -> [[a]]
 splitAlll i (x:xs) = case splitAtt i xs of 
                         (ys, [])    -> [ys]
                         (ys, rest)  -> ys : splitAlll i rest
+
+zipWithh :: (a -> b -> c) -> [a] -> [b] -> [c]
+zipWithh f (x:xs) (y:ys) = (f x y) : zipWithh f xs ys
+zipWithh _ _ _ = []
+
+transposee :: [[a]] -> [[a]]
+transposee' (xs:xss) = zipWithh (:) xs (transposee' xss)
+transposee' []       = repeat []
+transposee [] = []
+transposee xs = transposee' xs
+
+
+-- Maximum segment sum
+
+segments :: [Int] -> [[Int]]
+segments = ([] :) . concatMap (tail . inits) . tails
+
+
+
+-- Counting Trues
+
 
 

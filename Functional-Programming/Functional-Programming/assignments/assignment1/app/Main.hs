@@ -80,8 +80,11 @@ printTable table@(header:rows)
 -- * Exercise 7
 select :: Field -> Field -> Table -> Table
 select column value table@(header:rows)
-    | isNothing (elemIndex column header) = table
-    | otherwise = header : filter (\x -> x!!fromMaybe (-1) (elemIndex column header) == value) rows
+    | maybe (-1) id (elemIndex column header) == -1 = table
+    | otherwise = header : filter (\x -> x!!maybe (-1) id (elemIndex column header) == value) rows
+-- select column value table@(header:rows) = case elemIndex column header of 
+--                                             Nothing -> table
+--                                             Just index -> header : filter (\x -> x!!index == value) rows 
 
 -- * Exercise 8
 project :: [Field] -> Table -> Table
