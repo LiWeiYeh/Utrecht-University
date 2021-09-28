@@ -92,7 +92,7 @@ type Row   = (Field, Field, Field)
 type Board = (Row, Row, Row)
 
 exampleBoard = (
-    (X, B, B),
+    (X, X, O),
     (O, O, B),
     (B, B, X))
 
@@ -123,11 +123,11 @@ emptyBoard = ((B, B, B),
 printBoard :: Board -> String
 printBoard (r1, 
             r2,
-            r3) = printRow (r1) ++ "\n" ++ 
+            r3) = printRow r1 ++ "\n" ++ 
                   printLine ++ "\n" ++
-                  printRow (r2) ++ "\n" ++ 
+                  printRow r2 ++ "\n" ++ 
                   printLine ++ "\n" ++
-                  printRow (r3) ++ "\n" ++ 
+                  printRow r3 ++ "\n" ++ 
                   printLine
 
 printRow :: Row -> String
@@ -184,43 +184,94 @@ moves p (r1,r2,r3) = func 1 r1 ++
 -- Exercise 9
 
 hasWinner :: Board -> Maybe Player
-hasWinner board = undefined
+hasWinner (r1,r2,r3) = hasWinnerRows (r1,r2,r3) (verticals (r1,r2,r3)) (diagonals (r1,r2,r3))
+
+hasWinnerRow :: Row -> Maybe Player
+hasWinnerRow (a,b,c) | a == b && b == c && a == symbol P1 = Just P1
+                     | a == b && b == c && a == symbol P2 = Just P2
+                     | otherwise = Nothing
+
+hasWinnerRows (a,b,c) (d,e,f) (g,h) | hasWinnerRow a /= Nothing = hasWinnerRow a
+                                    | hasWinnerRow b /= Nothing = hasWinnerRow b
+                                    | hasWinnerRow c /= Nothing = hasWinnerRow c
+                                    | hasWinnerRow d /= Nothing = hasWinnerRow d
+                                    | hasWinnerRow e /= Nothing = hasWinnerRow e
+                                    | hasWinnerRow f /= Nothing = hasWinnerRow f
+                                    | hasWinnerRow g /= Nothing = hasWinnerRow g
+                                    | hasWinnerRow h /= Nothing = hasWinnerRow h
+                                    | otherwise = Nothing
 
 -- Exercise 10
 
 gameTree :: Player -> Board -> Rose Board
-gameTree = undefined
+gameTree p board | hasWinner board /= Nothing = MkRose board []
+                 | otherwise = MkRose board (map (\board' -> gameTree (nextPlayer p) board') (moves p board))
+
+
 
 -- | Game complexity
 
 -- Exercise 11
 
 gameTreeComplexity :: Int
-gameTreeComplexity = undefined
+gameTreeComplexity = leaves (gameTree P1 emptyBoard)
 
 -- | Minimax
 
 -- Exercise 12
 
+exampleBoard2 = ((X, B, B),
+                 (O, B, O),
+                 (X, B, B))
+
 minimax :: Player -> Rose Board -> Rose Int
-minimax = undefined
+minimax p roseboard = minimax' p roseboard
+            where
+                minimax' currentPlayer (MkRose a []) | hasWinner a == Just p = MkRose 1 []
+                                                     | hasWinner a == Nothing = MkRose 0 []
+                                                     | otherwise = MkRose (-1) []
+                minimax' currentPlayer (MkRose _ children) | p == currentPlayer = MkRose (maximum' [a | (MkRose a _) <- childRoseInts]) childRoseInts
+                                                           | otherwise          = MkRose (minimum' [a | (MkRose a _) <- childRoseInts]) childRoseInts
+                    where
+                        childRoseInts :: [Rose Int]
+                        childRoseInts = map (minimax' (nextPlayer currentPlayer)) children
+
 
 -- * Lazier minimum and maximums
 
 -- Exercise 13
 
 minimum' :: [Int] -> Int
-minimum' = undefined
+minimum' = minimum'' 1
+            where
+                minimum'' :: Int -> [Int] -> Int
+                minimum'' _ ((-1):_) = -1
+                minimum'' acc [] = acc
+                minimum'' acc (y:ys) | y < acc = minimum'' y ys
+                                        | otherwise = minimum'' acc ys
 
 maximum' :: [Int] -> Int
-maximum' = undefined
+maximum' = maximum'' (-1)
+            where
+                maximum'' :: Int -> [Int] -> Int
+                maximum'' _ (1:_) = 1
+                maximum'' acc [] = acc
+                maximum'' acc (y:ys) | y > acc = maximum'' y ys
+                                     | otherwise = maximum'' acc ys
 
 -- | Gameplay
 
 -- Exercise 14
 
 makeMove :: Player -> Board -> Maybe Board
-makeMove = undefined
+makeMove p board = bestBoard (root scoresRose') (children boardsRose') (children scoresRose')
+                    where 
+                        bestBoard :: Int -> [Rose Board] -> [Rose Int] -> Maybe Board
+                        bestBoard _ [] [] = Nothing 
+                        bestBoard x ((MkRose valueBoard _):xs) ((MkRose valueScore _):ys) | x == valueScore = Just valueBoard
+                                                                                          | otherwise = bestBoard x xs ys
+                        boardsRose' = gameTree p board
+                        scoresRose' = minimax p boardsRose'
 
 -- | Main
 
