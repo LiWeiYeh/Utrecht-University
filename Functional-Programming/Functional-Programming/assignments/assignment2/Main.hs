@@ -127,8 +127,7 @@ printBoard (r1,
                   printLine ++ "\n" ++
                   printRow r2 ++ "\n" ++ 
                   printLine ++ "\n" ++
-                  printRow r3 ++ "\n" ++ 
-                  printLine
+                  printRow r3 ++ "\n"
 
 printRow :: Row -> String
 printRow (c1, c2, c3) = show c1 ++ "|" ++ show c2 ++ "|" ++ show c3
@@ -143,40 +142,26 @@ moves :: Player -> Board -> [Board]
 moves p (r1,r2,r3) = func 1 r1 ++
                      func 2 r1 ++
                      func 3 r1 ++
-                     func 4 r2 ++ 
-                     func 5 r2 ++ 
+                     func 4 r2 ++
+                     func 5 r2 ++
                      func 6 r2 ++
                      func 7 r3 ++
                      func 8 r3 ++
                      func 9 r3
-                        where 
-                            func x (c1,c2,c3) | x == 1 = if c1 == B 
-                                                         then [((sign,c2,c3),r2,r3)]
-                                                         else []
-                                              | x == 2 = if c2 == B 
-                                                         then [((c1,sign,c3),r2,r3)]
-                                                         else []
-                                              | x == 3 = if c3 == B 
-                                                         then [((c1,c2,sign),r2,r3)]
-                                                         else []
-                                              | x == 4 = if c1 == B 
-                                                         then [(r1,(sign,c2,c3),r3)]
-                                                         else []
-                                              | x == 5 = if c2 == B 
-                                                         then [(r1,(c2,sign,c3),r3)]
-                                                         else []
-                                              | x == 6 = if c3 == B 
-                                                         then [(r1,(c1,c2,sign),r3)]
-                                                         else []
-                                              | x == 7 = if c1 == B 
-                                                         then [(r1,r2,(sign,c2,c3))]
-                                                         else []
-                                              | x == 8 = if c2 == B 
-                                                         then [(r1,r2,(c1,sign,c3))]
-                                                         else []
-                                              | x == 9 = if c3 == B 
-                                                         then [(r1,r2,(c1,c2,sign))]
-                                                         else []
+                        where
+                            func x (c1,c2,c3) | x == 1 && c1 == B = [((sign,c2,c3),r2,r3)]
+                                              | x == 2 && c2 == B = [((c1,sign,c3),r2,r3)]
+                                              | x == 3 && c3 == B = [((c1,c2,sign),r2,r3)]
+
+                                              | x == 4 && c1 == B = [(r1,(sign,c2,c3),r3)]
+                                              | x == 5 && c2 == B = [(r1,(c1,sign,c3),r3)]
+                                              | x == 6 && c3 == B = [(r1,(c1,c2,sign),r3)]
+
+                                              | x == 7 && c1 == B = [(r1,r2,(sign,c2,c3))]
+                                              | x == 8 && c2 == B = [(r1,r2,(c1,sign,c3))]
+                                              | x == 9 && c3 == B = [(r1,r2,(c1,c2,sign))]
+                                              
+                                              | otherwise = []
                             sign = symbol p
 
 -- | Gametree generation
@@ -184,30 +169,29 @@ moves p (r1,r2,r3) = func 1 r1 ++
 -- Exercise 9
 
 hasWinner :: Board -> Maybe Player
-hasWinner (r1,r2,r3) = hasWinnerRows (r1,r2,r3) (verticals (r1,r2,r3)) (diagonals (r1,r2,r3))
+hasWinner board = hasWinnerRows board (verticals board) (diagonals board)
 
 hasWinnerRow :: Row -> Maybe Player
 hasWinnerRow (a,b,c) | a == b && b == c && a == symbol P1 = Just P1
                      | a == b && b == c && a == symbol P2 = Just P2
                      | otherwise = Nothing
 
-hasWinnerRows (a,b,c) (d,e,f) (g,h) | hasWinnerRow a /= Nothing = hasWinnerRow a
-                                    | hasWinnerRow b /= Nothing = hasWinnerRow b
-                                    | hasWinnerRow c /= Nothing = hasWinnerRow c
-                                    | hasWinnerRow d /= Nothing = hasWinnerRow d
-                                    | hasWinnerRow e /= Nothing = hasWinnerRow e
-                                    | hasWinnerRow f /= Nothing = hasWinnerRow f
-                                    | hasWinnerRow g /= Nothing = hasWinnerRow g
-                                    | hasWinnerRow h /= Nothing = hasWinnerRow h
+hasWinnerRows (a,b,c) (d,e,f) (g,h) | isJust (hasWinnerRow a) = hasWinnerRow a
+                                    | isJust (hasWinnerRow b) = hasWinnerRow b
+                                    | isJust (hasWinnerRow c) = hasWinnerRow c
+                                    | isJust (hasWinnerRow d) = hasWinnerRow d
+                                    | isJust (hasWinnerRow e) = hasWinnerRow e
+                                    | isJust (hasWinnerRow f) = hasWinnerRow f
+                                    | isJust (hasWinnerRow g) = hasWinnerRow g
+                                    | isJust (hasWinnerRow h) = hasWinnerRow h
                                     | otherwise = Nothing
 
 -- Exercise 10
 
 gameTree :: Player -> Board -> Rose Board
-gameTree p board | hasWinner board /= Nothing = MkRose board []
-                 | otherwise = MkRose board (map (\board' -> gameTree (nextPlayer p) board') (moves p board))
-
-
+gameTree p board = case hasWinner board of
+                   Nothing ->  MkRose board (map (gameTree (nextPlayer p)) (moves p board))
+                   _ -> MkRose board []
 
 -- | Game complexity
 
@@ -228,7 +212,7 @@ minimax :: Player -> Rose Board -> Rose Int
 minimax p roseboard = minimax' p roseboard
             where
                 minimax' currentPlayer (MkRose a []) | hasWinner a == Just p = MkRose 1 []
-                                                     | hasWinner a == Nothing = MkRose 0 []
+                                                     | isNothing (hasWinner a) = MkRose 0 []
                                                      | otherwise = MkRose (-1) []
                 minimax' currentPlayer (MkRose _ children) | p == currentPlayer = MkRose (maximum' [a | (MkRose a _) <- childRoseInts]) childRoseInts
                                                            | otherwise          = MkRose (minimum' [a | (MkRose a _) <- childRoseInts]) childRoseInts
