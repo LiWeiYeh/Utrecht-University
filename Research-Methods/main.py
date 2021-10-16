@@ -38,6 +38,17 @@ class Main():
             index = random.randrange(len(self.population))
             self.population[index].food += 1            
 
+    def make_children(self):
+        for i in range(0, len(list(filter(lambda blob: isinstance(blob, Regular), self.population)))):
+            reg = Regular()
+            self.population.append(reg)
+
+        for i in range(0, len(list(filter(lambda blob: isinstance(blob, Greenbeard), self.population)))):
+            gb = Greenbeard()
+            self.population.append(gb)
+        random.shuffle(self.population)
+
+
     def kill_pop_no_food(self):
         self.population = list(filter(lambda blob: blob.food != 0, self.population))
         for blob in self.population:
@@ -101,7 +112,7 @@ if __name__ == "__main__":
     reg_win = 0
 
     simulations = 500
-    runs = 500
+    runs = 150
 
     list_size_reg = []
     list_size_gb = []
@@ -112,7 +123,7 @@ if __name__ == "__main__":
         gb_y = []
         reg_y = []
 
-        main.simulate(runs=runs, reg_pop_size=1000, gb_pop_size=150)
+        main.simulate(runs=runs, reg_pop_size=1000, gb_pop_size=1000)
 
         for i in range(0, len(main.reg_pop_size)):
             gen = i
@@ -143,12 +154,12 @@ if __name__ == "__main__":
     reg_x = np.arange(runs)
     gb_x = np.arange(runs)
 
-    plt.plot(gb_x, gb_y, label="Green-beard")
-    plt.plot(reg_x, reg_y, label="Regular")
+    plt.plot(gb_x, gb_y, label="Green-beard", linestyle='--', color='black')
+    plt.plot(reg_x, reg_y, label="Regular", linestyle='-', color='black')
     plt.ylim(0, 1)
     plt.xlabel('Generations')
     plt.ylabel('Population size')
-    plt.title('Simulating Altruism')
+    # plt.title('Simulating Altruism')
     plt.legend()
     plt.show()
 
