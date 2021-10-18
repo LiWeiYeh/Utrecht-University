@@ -1,0 +1,4 @@
+exampleTree = Node (
+    Node (Node (Node (Leaf 0) 1 (Leaf 2))
+    6
+    Node (Leaf 7) 9 (Leaf 10)))
