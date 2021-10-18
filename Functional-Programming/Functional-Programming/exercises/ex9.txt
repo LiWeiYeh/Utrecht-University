@@ -1,0 +1,593 @@
+module Main where
+
+import Data.Foldable
+import Data.List
+
+main :: IO ()
+main = putStrLn "Hello world"
+
+==============================================
+case xs = []
+
+(reverse . reverse) []
+= def (.)
+reverse (reverse [])
+= def reverse
+reverse []
+= def reverse 
+[]
+...
+[]
+= -- def [id]
+id []
+
+case xs = z:zs
+(reverse . reverse) (z:zs)
+= def (.)
+reverse (reverse (z:zs))
+= def reverse
+reverse (reverse zs ++ [z])
+= def reverse singleton
+[z] ++ reverse (reverse (zs))
+= inductive hypothesis
+[z] ++ zs
+= def (++)
+z:zs
+...
+z:zs
+=
+id (z:zs)
+
+reverse (xs ++ ys) = reverse ys ++ reverse xs
+reverse [] = []
+reverse (x:xs) = reverse xs ++ [x]
+id x = x
+(f . g) x = f (g x)
+
+==============================================
+
+(map f . (x :)) xs
+= def (.)
+map f ((x:) xs)
+= -- desugar
+map f (x : xs)
+= -- def map cons
+f x : map f xs
+= -- def map cons
+(f x :) (map f xs)
+= -- desugar
+(f x :) ((map f) xs)
+= def (.)
+((f x :) . map f) xs
+
+map f [] = []
+map f (x:xs) = f x : map f xs
+(f . g) x = f (g x)
+
+==============================================
+pf: length . map f = length
+
+base case: xs = []
+
+length . map f []
+= def (.)
+length (map f [])
+= def map
+length []
+=
+0
+...
+0
+= def length
+length []
+
+inductive case: xs = (z:zs)
+
+length . map f (z:zs)
+= def (.)
+length (map f (z:zs))
+= def (map)
+length (f z : map f zs)
+= def length
+1 + length (map f zs)
+= inductive hypothesis
+1 + length zs
+...
+1 + length xs
+=
+length (x:xs)
+
+
+length [] = 0
+length (x:xs) = 1 + length (xs)
+map f [] = []
+map f (x:xs) = f x : map f xs
+(f . g) x = f (g x)
+
+==============================================
+pf: length (xs ++ ys) = length xs + length ys
+
+base case: xs = []
+
+length ([] ++ ys)
+= def (++)
+length ys
+...
+length ys
+= desugar
+0 + length ys
+= def length 
+length [] + length ys
+
+
+inductive case: xs = (z:zs)
+
+length ((z:zs) ++ ys)
+= TODO can i do this???
+1 + length zs + length ys
+=
+...
+= 
+1 + length zs + length ys
+= def length
+length (z:zs) + length ys
+
+
+[] ++ ys = ys
+length [] = 0
+length (x:xs) = 1 + length (xs)
+map f [] = []
+map f (x:xs) = f x : map f xs
+(f . g) x = f (g x)
+
+==============================================
+pf length . concat   = sum . map length
+
+base case: xs = []
+length . concat []
+= def (.)
+length (concat [])
+= def concat
+length ([])
+= def length base
+0
+= def sum base
+sum ([])
+=
+sum (map length [])
+= def (.)
+sum . map length []
+
+
+inductive case: xs = (z:zs)
+
+length . concat (z:zs)
+= def (.)
+length (concat (z:zs))
+= def concat
+length (z ++ zs)
+= def (++) TODO ?
+...
+=
+sum (1 : map length zs)
+= def length
+sum (length z : map length zs)
+= def map
+sum (map length (z:zs))
+= def (.)
+sum . map length (z:zs)
+
+
+
+length [] = 0
+length (x:xs) = 1 + length xs
+map f [] = []
+map f (x:xs) = f x : map f xs
+(f . g) x = f (g x)
+sum [] = 0
+sum (x:xs) = x + sum xs
+concat [] = []
+concat (x:xs) = x ++ xs
+[] ++ ys = ys
+(z:zs) ++ ys = z : (zs ++ ys)
+==============================================
+pf: sum (xs ++ ys) = sum xs + sum ys
+
+base case: xs = []
+
+sum ([] ++ ys)
+= def (++)
+sum ys
+...
+sum ys
+= desugar
+0 + sum ys
+= def sum
+sum [] + sum ys
+
+base case: xs = (z:zs)
+
+sum ((z:zs) ++ ys)
+= def (++)
+sum (z : (zs ++ ys))
+= def sum
+z + sum (zs ++ ys)
+= inductive hypothesis
+...
+= inductive hypothesis
+z + sum zs + sum ys
+= def sum
+sum (z:zs) + sum ys
+
+
+
+sum [] = 0
+sum (x:xs) = x + sum xs
+[] ++ ys = ys
+(z:zs) ++ ys = z : (zs ++ ys)
+==============================================
+pf: sum . concat   = sum . map sum
+
+base case: xs = []
+
+sum . concat []
+= def (.)
+sum (concat [])
+= def concat
+sum []
+= def sum
+0
+...
+0
+= def sum
+sum []
+= def map
+sum (map sum [])
+= def (.)
+sum . map sum []
+
+inductive case: xs = (z:zs)
+sum . concat (z:zs)
+= def (.)
+sum (concat (z:zs))
+= def concat
+sum (z ++ zs)
+...
+= TODO ???
+sum (sum z : map sum zs)
+= def map
+sum (map sum (z:zs))
+= def (.)
+sum . map sum (z:zs)
+
+
+f . g x = (f (g x))
+concat [] = []
+concat (x:xs) = x ++ xs
+map f [] = []
+map f (x:xs) = f x : map f xs
+sum [] = 0
+sum (x:xs) = x + sum xs
+[] ++ ys = ys
+(x:xs) ++ ys = x : (xs ++ ys)
+==============================================
+pf: map f . concat = concat . map (map f)
+
+base case: xs = []
+
+map f . concat []
+= def (.)
+map f (concat [])
+= def concat
+map f []
+= def map
+[]
+...
+[]
+= def map
+map (map f) []
+
+
+inductive case: xs = (z:zs)
+
+map f . concat (z:zs)
+= def (.)
+map f (concat (z:zs))
+= def concat
+map f (z ++ zs)
+= def lemma -> let z = z':zs'
+map f (z' : zs' ++ zs)
+= def map
+f z' map f (zs' ++ zs)
+= inductive hypothesis
+...
+= inductive hypothesis
+map f (z':zs') : map (map f) zs
+= def lemma let z = (z':zs')
+map f z : map (map f) zs
+= def map
+map (map f ) (z:zs)
+
+
+
+(x:xs) ++ ys = x : (xs ++ ys)
+f . g x = f (g x)
+map f [] = []
+map f (x:xs) = f x : map f xs
+concat [] = []
+concat (x:xs) = x ++ xs
+==============================================
+pf: sum (map (1+) xs) = length xs + sum xs
+
+base case: xs = []
+
+sum (map (1+) []])
+= def map
+sum []
+= def sum
+0
+...
+0
+= desugar TODO: is this even desugaring?
+0 + 0
+= def sum
+0 + sum []
+= def length
+length [] + sum []
+
+inductive case: xs = (z:zs)
+
+sum (map (1+) (z:zs))
+= def map
+sum ((1 + z) : map (1+) zs)
+= def sum
+1 + z + sum (map (1+) zs)
+= inductive hypothesis
+...
+= inductive hypothesis
+1 + z + length zs + sum zs
+= commutative law
+1 + length zs + z + sum (z:zs)
+= def sum
+1 + length zs + sum (z:zs)
+= def length
+length (z:zs) + sum (z:zs)
+
+sum [] = 0
+sum (x:xs) = x + sum xs
+map f [] = []
+map f (x:xs) = f x : map f xs
+length [] = 0
+length (x:xs) = 1 + length xs
+==============================================
+pf: sum (map ((k+) . (n*)) []) = ?? TODO
+pf: sum (map (1+) xs) = length xs + sum xs
+
+
+base case: xs = []
+
+sum (map ((k+) . (n*)) []) 
+= def map
+sum []
+= def sum
+0
+...
+TODO
+
+
+inductive case: xs = (z:zs)
+sum (map ((k+) . (n*)) (z:zs))
+= def (.)
+sum (map (k+(n*)) (z:zs))
+= def map
+sum ((k+(n*z)) : map ((k+(n*))) zs)
+= def sum
+(k+n*z) + sum (map ((k+(n*))) zs))
+= inductive hypothesis
+...
+= 
+TODO
+
+
+sum [] = 0
+sum (x:xs) = x + sum xs
+map f [] = []
+map f (x:xs) = f x : map f xs
+length [] = 0
+length (x:xs) = 1 + length xs
+==============================================
+pf: foldr op e . concat = foldr op e . map (foldr op e)
+
+base case: xs = []
+
+foldr op e . concat []
+= def (.)
+foldr op e (concat [])
+= def concat
+foldr op e []
+= def foldr
+[]
+...
+[]
+= def foldr
+foldr op e []
+= def map
+foldr op e (map (foldr op e) [])
+= def (.)
+foldr op e . map (foldr op e) []
+
+inductive case: xs = (z:zs)
+
+foldr op e . concat (z:zs)
+= def (.)
+foldr op e (concat (z:zs))
+= def concat
+foldr op e (z ++ zs)
+... TODO ???
+foldr op e (foldr op e z : map (foldr op e zs))
+= def map
+foldr op e (map (foldr op e) (z:zs))
+= def (.)
+foldr op e . map (foldr op e) (z:zs)
+
+
+-- lemma base case: let z = []
+foldr op e ([] ++ zs)
+= def (++)
+foldr op e (zs)
+... TODO ???
+op e ()
+= def foldr
+foldr op e (e : map (foldr op e zs))
+= def foldr
+foldr op e (foldr op e [] : map (foldr op e zs))
+
+
+
+concat [] = []
+concat (x:xs) = x ++ xs
+map f [] = []
+map f (x:xs) = f x : map f xs
+foldr op e [] = e
+foldr op e (x:xs) = op x (foldr op e xs)
+============================================== TODO: is this right?
+map f = foldr g e
+where
+    f = id
+    g = (:)
+    e = []
+
+base case: xs = []
+
+map id []
+= def map
+[]
+...
+[]
+= def foldr
+foldr (:) [] []
+
+
+inductive case: xs = (z:zs)
+
+map id (z:zs)
+=
+z : zs
+=
+...
+= inductive hypothesis
+z : (foldr (:) [] zs)
+= def (:)
+((:) z (foldr (:) [] zs)
+= def foldr
+foldr (:) [] (z:zs)
+==============================================
+pf: add n m = add m n
+
+
+
+
+-- lemmas
+add n Zero = n
+add n (Succ m) = Succ (add n m)
+
+==============================================
+pf: mult n m = mul m n
+
+
+==============================================
+pf: size t = length (enumInfix t)
+
+base case: t = Leaf
+
+size Leaf
+= def size
+0
+...
+0
+= def length
+length []
+= def enumInfix
+length (enumInfix Leaf)
+
+
+inductive case: t = Node l x r
+
+size (Node l x r)
+= def size
+size l + 1 + size r
+= commutative law
+1 + size l + size reverse
+= inductive hypothesis
+...
+= inductive hypothesis
+1 + + length (enumInfix l) + length (enumInfix r)
+= def length
+length [x] + length (enumInfix l) + length (enumInfix r)
+= commutative law TODO: ????
+length (enumInfix l) + length [x] + length (enumInfix r)
+= distributive law TODO: is this possible?
+length (enumInfix l ++ [x] ++ enumInfix r)
+= def enumInfix
+length (enumInfix Node l x r)
+==============================================
+pf: length . catMaybes = length . filter isJust
+
+base case: xs = []
+
+
+length . catMaybes []
+= def (.)
+length (catMaybes [])
+= def catMaybes
+length [] 
+= def length
+0
+...
+0
+=
+length []
+= def filter
+length (filter isJust [])
+= def (.)
+length . filter isJust []
+
+
+inductive case: xs = (z:zs)
+
+length . catMaybes (z:zs)
+= def (.)
+length (catMaybes (z:zs))
+= def lemma
+...
+= def lemma
+length (filter isJust (z:zs))
+= def (.)
+length . filter isJust (z:zs)
+
+
+-- lemma let z = Nothing
+length (catMaybes (Nothing:zs))
+= def catMaybes
+length (catMaybes zs)
+= inductive hypothesis
+...
+= inductive hypothesis
+length (filter isJust zs)
+= def filter
+length (filter isJust (Nothing:zs))
+
+-- lemma let z = Just w
+length (catMaybes (Just w:zs))
+= def catMaybes
+length (w : catMaybes zs)
+= inductive hypothesis
+...
+= inductive hypothesis
+length (w : filter isJust zs)
+= def filter
+length (filter isJust (Just w:zs))
+
+
+
+
