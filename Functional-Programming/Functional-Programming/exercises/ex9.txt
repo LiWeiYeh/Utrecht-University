@@ -27,7 +27,7 @@ case xs = z:zs
 reverse (reverse (z:zs))
 = def reverse
 reverse (reverse zs ++ [z])
-= def reverse singleton
+= def lemma 0
 [z] ++ reverse (reverse (zs))
 = inductive hypothesis
 [z] ++ zs
@@ -38,7 +38,34 @@ z:zs
 =
 id (z:zs)
 
-reverse (xs ++ ys) = reverse ys ++ reverse xs
+
+-- lemma 0
+reverse (xs ++ ys) = reverse xs + reverse ys
+
+base case: xs = []
+reverse ([] ++ ys)
+= def (++)
+reverse ys
+= def (++)
+[] ++ reverse ys
+= def reverse
+reverse [] ++ reverse ys
+
+inductive case: xs = (z:zs)
+reverse ((z:zs) ++ ys)
+= def (++)
+reverse (z : (zs ++ ys))
+= def reverse
+z : reverse (zs ++ ys)
+= inductive hypothesis
+...
+= inductive hypothesis
+z + reverse zs + reverse ys
+= def reverse
+reverse (z:zs) + reverse ys
+
+
+
 reverse [] = []
 reverse (x:xs) = reverse xs ++ [x]
 id x = x
@@ -123,7 +150,9 @@ length [] + length ys
 inductive case: xs = (z:zs)
 
 length ((z:zs) ++ ys)
-= TODO can i do this???
+= def (++)
+length (z : (zs ++ ys))
+=
 1 + length zs + length ys
 =
 ...
@@ -165,8 +194,10 @@ length . concat (z:zs)
 = def (.)
 length (concat (z:zs))
 = def concat
-length (z ++ zs)
-= def (++) TODO ?
+length (z ++ concat zs)
+= def lemma: length (xs ++ ys) = length xs + length ys
+length z + length concat zs
+= inductive hypothesis
 ...
 =
 sum (1 : map length zs)
@@ -187,7 +218,7 @@ map f (x:xs) = f x : map f xs
 sum [] = 0
 sum (x:xs) = x + sum xs
 concat [] = []
-concat (x:xs) = x ++ xs
+concat (x:xs) = x ++ concat xs
 [] ++ ys = ys
 (z:zs) ++ ys = z : (zs ++ ys)
 ==============================================
@@ -247,23 +278,55 @@ sum (map sum [])
 sum . map sum []
 
 inductive case: xs = (z:zs)
+
 sum . concat (z:zs)
 = def (.)
 sum (concat (z:zs))
 = def concat
-sum (z ++ zs)
+sum (z ++ concat zs)
+= def lemma 0
+sum z + sum (z ++ concat zs)
+= inductive hypothesis
 ...
-= TODO ???
+= inductive hypothesis
+sum z + sum (map sum zs)
+= def sum
 sum (sum z : map sum zs)
 = def map
 sum (map sum (z:zs))
 = def (.)
 sum . map sum (z:zs)
 
+-- lemma 0: sum (xs ++ ys) = sum xs + sum ys
+base case: xs = []
+sum ([] ++ ys)
+= def (++)
+sum ys
+...
+=
+sum ys
+= def sum 
+sum [] + sum ys
+
+inductive case: xs = (z:zs)
+sum ((z:zs) ++ ys) 
+= def (++)
+sum (z : (zs ++ ys))
+= def sum
+z + sum (zs ++ ys)
+= inductive hypothesis
+...
+= inductive hypothesis
+z + sum zs + sum ys
+= def sum
+sum (z:zs) + sum ys
+
+
+
 
 f . g x = (f (g x))
 concat [] = []
-concat (x:xs) = x ++ xs
+concat (x:xs) = x ++ concat xs
 map f [] = []
 map f (x:xs) = f x : map f xs
 sum [] = 0
@@ -328,7 +391,7 @@ sum []
 0
 ...
 0
-= desugar TODO: is this even desugaring?
+= 
 0 + 0
 = def sum
 0 + sum []
@@ -360,7 +423,7 @@ map f (x:xs) = f x : map f xs
 length [] = 0
 length (x:xs) = 1 + length xs
 ==============================================
-pf: sum (map ((k+) . (n*)) []) = ?? TODO
+pf: sum (map ((k+) . (n*)) []) = k * (length xs) + n * (sum xs)
 pf: sum (map (1+) xs) = length xs + sum xs
 
 
@@ -372,7 +435,13 @@ sum []
 = def sum
 0
 ...
-TODO
+0
+=
+0 + 0
+= 
+k*0 + n* 0
+= def length
+k* (length []) + n* (sum [])
 
 
 inductive case: xs = (z:zs)
@@ -385,8 +454,17 @@ sum ((k+(n*z)) : map ((k+(n*))) zs)
 (k+n*z) + sum (map ((k+(n*))) zs))
 = inductive hypothesis
 ...
-= 
-TODO
+= inductive hypothesis
+k + n*z + length zs + sum zs
+= commutative law addition
+1*k + k*(length zs) + n*z + n*(sum zs)
+= commutative law multiplication
+k* (1 + length (zs)) + n* (z + sum (zs))
+= def sum
+k* (1 + length (zs)) + n* (sum (z:zs))
+= def length 
+k* (length (z:zs)) + n* (sum (z:zs))
+
 
 
 sum [] = 0
@@ -396,7 +474,7 @@ map f (x:xs) = f x : map f xs
 length [] = 0
 length (x:xs) = 1 + length xs
 ==============================================
-pf: foldr op e . concat = foldr op e . map (foldr op e)
+pf: foldr op e . concat xs = foldr op e . map (foldr op e) xs
 
 base case: xs = []
 
@@ -422,7 +500,7 @@ foldr op e . concat (z:zs)
 = def (.)
 foldr op e (concat (z:zs))
 = def concat
-foldr op e (z ++ zs)
+foldr op e (z ++ concat zs)
 ... TODO ???
 foldr op e (foldr op e z : map (foldr op e zs))
 = def map
@@ -445,12 +523,12 @@ foldr op e (foldr op e [] : map (foldr op e zs))
 
 
 concat [] = []
-concat (x:xs) = x ++ xs
+concat (x:xs) = x ++ concat xs
 map f [] = []
 map f (x:xs) = f x : map f xs
 foldr op e [] = e
 foldr op e (x:xs) = op x (foldr op e xs)
-============================================== TODO: is this right?
+==============================================
 map f = foldr g e
 where
     f = id
@@ -471,9 +549,11 @@ foldr (:) [] []
 inductive case: xs = (z:zs)
 
 map id (z:zs)
-=
-z : zs
-=
+= def map
+id z : map id zs
+= def id
+z : map id zs
+= inductive hypothesis
 ...
 = inductive hypothesis
 z : (foldr (:) [] zs)
@@ -484,12 +564,32 @@ foldr (:) [] (z:zs)
 ==============================================
 pf: add n m = add m n
 
+base case: n = Zero
 
+add Zero m 
+= def add
+m
+...
+m
+= def add 
+add m Zero
 
+base case: n = Succ m
+add (Succ m) n
+= def add
+Succ (add n m)
+= inductive hypothesis
+...
+= inductive hypothesis
+Succ (add m n)
+= def add
+add m (Succ n)
 
 -- lemmas
-add n Zero = n
-add n (Succ m) = Succ (add n m)
+add Zero y = y
+add x Zero = x
+add x (Succ y) = Succ (add x y)
+add (Succ x) y = Succ (add x y)
 
 ==============================================
 pf: mult n m = mul m n
@@ -521,10 +621,10 @@ size l + 1 + size r
 = inductive hypothesis
 ...
 = inductive hypothesis
-1 + + length (enumInfix l) + length (enumInfix r)
+1 + length (enumInfix l) + length (enumInfix r)
 = def length
 length [x] + length (enumInfix l) + length (enumInfix r)
-= commutative law TODO: ????
+= commutative law addition
 length (enumInfix l) + length [x] + length (enumInfix r)
 = distributive law TODO: is this possible?
 length (enumInfix l ++ [x] ++ enumInfix r)
@@ -566,7 +666,8 @@ length (filter isJust (z:zs))
 length . filter isJust (z:zs)
 
 
--- lemma let z = Nothing
+-- lemma 
+base case: z = Nothing
 length (catMaybes (Nothing:zs))
 = def catMaybes
 length (catMaybes zs)
@@ -577,7 +678,7 @@ length (filter isJust zs)
 = def filter
 length (filter isJust (Nothing:zs))
 
--- lemma let z = Just w
+inductive case: z = Just w
 length (catMaybes (Just w:zs))
 = def catMaybes
 length (w : catMaybes zs)

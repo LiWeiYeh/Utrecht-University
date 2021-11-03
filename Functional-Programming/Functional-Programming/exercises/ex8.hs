@@ -16,17 +16,18 @@ main :: IO ()
     --             "" -> return []
     --             _  -> return (path:askFiles) 
 
-main = do 
-    tree <- readTree
-    putStrLn "Give a number: "
-    q <- getChar
-    q' <- read [n]
-    isInTree <- findTree tree q'
-    case isInTree of
-        True  -> putStrLn "The number appears in the Tree"
-        False -> putStrLn "The number does not appear in the Tree"
-        _ -> ()
+-- main = do 
+--     tree <- readTree
+--     putStrLn "Give a number: "
+--     q <- getChar
+--     q' <- read [n]
+--     isInTree <- findTree tree q'
+--     case isInTree of
+--         True  -> putStrLn "The number appears in the Tree"
+--         False -> putStrLn "The number does not appear in the Tree"
+--         _ -> ()
 
+main = undefined
 
 
 returnMultiples = do
@@ -59,8 +60,8 @@ readTree = do
     contents <- readFile path
     return (read contents)
 
-findTree (Leaf a) n     | n == a = True
-                        | otherwise = False
-findTree (Node l x r) n | n == x = True
-                        | n <  x = findTree l
-                        | otherwise = findTree r
+-- findTree (Leaf a) n     | n == a = True
+--                         | otherwise = False
+-- findTree (Node l x r) n | n == x = True
+--                         | n <  x = findTree l
+--                         | otherwise = findTree r
