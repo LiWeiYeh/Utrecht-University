@@ -1,0 +1,197 @@
+-- 1a
+annotateMaybe :: (t -> a) -> Maybe t -> Maybe (a, t)
+annotateMaybe f Nothing = Nothing
+annotateMaybe f (Just t) = Just (f t, t)
+
+annotateList :: (t -> a) -> [t] -> [(a, t)]
+annotateList f [] = []
+annotateList f (x:xs) = map (\x -> (f x, x))
+
+-- 1b
+annotate :: Functor f => (t -> a) -> f t -> f (a, t)
+annotate f  = fmap (\x -> (f x, x))
+
+-- 1c
+split :: Functor f => f (a, t) -> (f a, f t)
+split x = (fmap (\(a,_) -> a) x, fmap (\(_,t) -> t) x)
+
+-- ???
+
+
+
+-- 2a
+class Monoid m where
+    mempty :: m
+    (<>) :: m -> m -> m
+
+class Functor f => Crushable f where
+    crush :: Monoid m => f m -> m
+
+instance Crushable [] where
+    crush [] = mempty
+    crush (m:ms) = m <> crush
+
+instance (Maybe where
+    crush Nothing = Nothing
+    crush (Just x) = x
+
+instance Crushable Tree where
+    crush (Leaf a) = a
+    crush (Node l x r) = crush l <> x <> crush r
+
+-- 2b
+data Sum a = Sum { unSum :: a }
+
+instance Num a => Monoid (Sum a) where
+    mempty = Sum 0
+    Sum x <> Sum y = Sum (x + y)
+
+glength :: Crushable f => f a -> Integer
+glength xs = unSum . crush . fmap (\_ -> Sum 1)
+
+-- 2c
+data Tropical a = Value a | Infinite
+instance Ord a => Monoid (Tropical a) where
+    mempty = Infinite
+    (<>) x Infinite = x
+    (<>) Infinite y = y
+    (<>) (Value x) (Value y) = Value (min x y)
+
+
+
+-- 3a
+pf: length . concat = sum . map length
+
+-> length . concat xs = sum . map length xs
+
+f . g x = f (g x)
+
+let xs = []
+
+length . concat [] 
+= def (g)
+length (concat [])
+= def (c)
+length []
+= def length
+0
+= def sum
+sum []
+= def (e)
+sum (map length [])
+= def (g)
+sum . map length []
+
+let xs = (x:xs) 
+
+length . concat (x:xs) 
+= def (g)
+length (concat (x:xs))
+= def (d)
+length (x ++ concat xs)
+= lemma length
+length x + length (concat xs)
+= I.H.
+length x + sum (map length xs)
+= def (b)
+sum (length x : map length xs)
+= def (f)
+sum (map length (x:xs))
+= def (g)
+sum . map length (x:xs)
+
+-- 3b
+
+pf: filter p xs = mapMaybe (\x -> if p x then Just x else Nothing) xs
+
+let xs = []
+
+filter p []
+= def (a)
+[]
+= def (c)
+mapMaybe (\x -> if p x then Just x else Nothing) []
+
+let xs = (z:zs)
+let predicate p = True
+
+filter p (z:zs)
+= def (b1)         or    def (b2)
+x : filter p xs    or    filter p xs
+= I.H.
+y : mapMaybe (\x -> if p x then Just x else Nothing) zs or mapMaybe (\x -> if p x then Just x else Nothing) zs
+
+= def (d1)                                              or (d2)
+mapMaybe (\x -> if p x then Just x else Nothing) (z:zs)
+
+
+
+-- 4a
+evalM :: Monad m => (v -> m Integer) -> ArithExpr v -> m Integer
+evalM m (Variable v) = m v
+evalM _ (Literal n) = return n
+evalM m (Add e1 e2) = do
+    v1 <- evalM m e1
+    v2 <- evalM m e2
+    return (v1 + v2)
+evalM m (Times e1 e2) = do
+    v1 <- evalM m e1
+    v2 <- evalM m e2
+    return (v1 * v2)
+
+
+
+
+-- 4b
+eval' :: Eq v => [(v, Integer)] -> ArithExpr v -> Maybe Integer
+eval' kv v = evalM (\x -> lookup x kv) v 
+
+-- 4c
+return x = TF (Just x, mempty)
+
+(>>=) (TF (Nothing, set)) _ = TF (Nothing,  set)
+(>>=) (TS ((Just v), set)) f = 
+    let TF (r, set2) = f v
+    in TF (r, set1 <> set2)
+
+-- 4d
+prop n = verb' (Literal n) == n
+
+
+
+-- 5
+g :: Int -> Maybe Int
+h :: a -> Maybe a
+
+1 Nothing
+2 Just _
+3 Int
+4 Int
+5 [(Int, Char)]
+6 [(1, 'a'), (2, 'b')]
+
+
+
+-- 6a
+WHNF -> is a constructor
+     -> not fully evaluated -> []
+     -> not fully evaluated -> 0
+WHNF -> list constructor
+
+-- 6b
+take2 undefined [] = undefined
+take1 undefined [] = []
+
+
+-- 6c
+take2 n xs = n `seq` take1 n xs
+            -- evaluates n, then passes it to take1 n xs
+
+
+
+-- 7a
+
+
+
+
+-- rewatch do notation to list comprehension

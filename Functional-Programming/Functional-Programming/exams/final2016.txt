@@ -1,0 +1,40 @@
+instance Eq LogEntry where
+    (E t adr1 adr2 m) == (E t' adr1' adr2' m') = m == m' && ((adr1 == adr1' && adr2 == adr2') || (adr1 == adr2' && adr2 == adr1'))
+
+instance Ord LogEntry where
+    (<=) (E t adr1 adr2 m) (E t' adr1' adr2' m) = 
+        t <= t'
+
+
+
+i)      a
+ii)     a
+iii)    b
+iv)     b
+v)      b?
+vi)     a?
+
+
+
+
+
+
+cv2bs Silence = []
+cv2bs (Black p) = True : (cv2bs p)
+cv2bs (White p) = False : (cv2bs p)
+
+
+genPiano :: Gen Piano
+genPiano = do
+    bs <- arbitrary :: Gen [Bool]
+    return (createP bs)
+
+createP [] = Silence
+createP (True : xs) = Black (createP xs)
+createP (False : xs) = White (createP xs)
+
+
+instance Arbitrary Piano where
+    arbitrary = genPiano
+
+

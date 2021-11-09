@@ -1,0 +1,209 @@
+-- 1a
+
+data Tree a = Leaf | Node a (Tree a) (Tree a)
+
+instance Zippable (Tree a) where
+    zip :: f a -> f b -> f (a, b)
+    zip Leaf _ = Leaf
+    zip _ Leaf = Leaf
+    zip (Node a l r) (Node a' l' r') = 
+        Node (a, a') (zip (l l')) (zip (r r'))
+
+
+
+
+
+
+-- 1b
+zipWith :: (Functor f, Zippable f) :: (a -> b -> c) -> f a -> f b -> f c
+
+zipWith f xs ys = fmap (uncurry f) (zip xs ys)
+
+
+
+
+
+-- 1c
+instance Zippable [] where
+    zip xs ys = [(x, y) | x <- xs, y <- ys]
+
+zip (1,2) () with list concat gives (1, []) : (2, []) : []
+whereas
+zip (1,2) () with the other gives []
+
+
+
+
+-- 2a
+pf: foldr (<>) e [x] = x
+
+foldr (<>) e [x]
+= def list
+foldr (<>) e (x:[])
+= def (b)
+x <> foldr (<>) e []
+= def (a)
+x <> e
+= def (2)
+...
+x
+
+
+
+
+
+-- 2b
+pf: foldr (<>) e = foldr (<>) e . reverse
+
+=== foldr (<>) e xs = foldr (<>) e . reverse xs
+
+let xs = []
+
+foldr (<>) e []
+= def a
+e
+= def a
+foldr (<>) e []
+= def (c)
+foldr (<>) e (reverse [])
+= def e
+foldr (<>) e . reverse []
+
+
+
+let xs = (z:zs)
+
+foldr (<>) e (z:zs)
+= def (b)
+z <> foldr (<>) e zs
+= I.H.
+z <> (foldr (<>) e . reverse) zs
+= def (.)
+z <> (foldr (<>) e (reverse zs)
+= def 2 a
+(foldr (<>) e [z])) <> (foldr (<>) e (reverse zs)
+= def (4)
+(foldr (<>) e (reverse zs) <> (foldr (<>) e [z]))
+= def lemma
+foldr (<>) e (reverse zs ++ [z])
+= def (d)
+foldr (<>) e (reverse (z:zs))
+= def (.)
+foldr (<>) e . reverse (z:zs)
+
+
+
+
+-- 2c
+pf: length (filter p xs) + length (filter (not . p) xs) = length xs
+
+length [] = []
+length (x:xs) = 1 + length xs
+
+
+let xs = []
+
+length (filter p []) + length (filter (not . p) []) 
+= def f
+length [] + length []
+= def length
+0
+= def length 
+length []
+
+
+
+let xs = (z:zs), where p x = True
+
+length (filter p (z:zs)) + length (filter (not . p) (z:zs))
+= def filter where p x = True
+length (z : filter p zs) + length (filter (not . p) zs)
+= def length cons
+1 + length (filter p zs) + length (filter (not . p) zs)
+= I.H.
+1 + zs
+= def length cons
+length (z:zs)
+
+
+
+let xs = (z:zs), where p x = False
+
+length (filter p (z:zs)) + length (filter (not . p) (z:zs))
+= def filter where p x = False
+length (filter p zs) + length (z : filter (not . p) zs)
+= def length cons
+length (filter p zs) + 1 + length (filter (not . p) zs)
+= addition law swap places
+1 + length (filter p zs) + length (filter (not . p) zs)
+= I.H.
+1 + zs
+= def length cons
+length (z:zs)
+
+
+
+
+
+-- 3a
+prop expr = eval (Add expr 0) == eval (expr)
+prop expr1 expr2 = eval (Mult expr1 expr2) == evel (Mult expr2 expr1)
+
+
+
+-- 3b
+checkOptimizer e = e == (opt e)
+
+
+
+
+-- 3c
+instance Arbitrary Expr where
+    arbitrary :: Gen a
+    arbitrary = do
+        n  <- arbitrary
+        e1 <- arbitrary
+        e2 <- arbitrary
+        elements [ 
+            Literal n,
+            Add e1 e2,
+            Mult e1 e2
+        ]
+
+
+
+
+-- 3d
+there's a low probability that a zero will be randomly generated, so we will have to create a generator where there is atleast a 0
+
+
+-- 4a
+instance Monad (Result e) where
+    return :: a -> Result e a
+    return r = Ok r
+
+    (>>=) :: Result e a -> (a -> Result e b) -> Result e b
+    (>>=) (Fail e) _ = Fail e
+    (>>=) (Ok r)   f = f r
+
+
+
+-- 4b
+tour [] = do
+    Fail "No towns to visit!"
+tour [x] = do
+    give x
+tour (x:y:zs) = do
+    give x
+    travel x y
+    tour (y:zs)
+
+
+
+
+
+-- 5
+a) -> D
+b) -> C
+c) -> B
+
