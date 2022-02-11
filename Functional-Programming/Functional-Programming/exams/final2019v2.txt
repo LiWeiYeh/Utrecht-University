@@ -1,0 +1,123 @@
+--  1a
+instance Functor First where
+    fmap _ (Never) = Never
+    fmap f (First a) = First (f a)
+
+-- 1b
+instance Monoid (First a) where
+    mempty = Never
+    (<>) (First a) _ = First a
+    (<>) Never b     = b
+
+
+-- 1c
+bimapThese :: (l -> l') -> (r -> r') -> These l r -> These l' r'
+bimapThese _ _ Neither = Neither
+bimapThese fl _ (This l) = This (fl l)
+bimapThese _ fr (That r) = That (fr r)
+
+
+
+-- 1d
+class Bifunctor t where
+    (l -> l') -> (r -> r') -> t l r -> t l' r'
+
+
+
+
+-- 1e
+foo :: Bifunctor t => t Int Float -> t String String
+foo (x, y) = (show x, show y)
+
+
+
+-- 2a
+isPrefixOf :: Eq a => [a] -> [a] -> Bool
+isPrefixOf [] xs = True
+isPrefixOf (x:xs) (y:ys) | x == y = isPrefixOf xs ys
+                         | otherwise = False
+
+
+-- 2b
+before xs ys zs 
+    | a == Never = False
+    | b == Never = False
+    | otherwise 
+    =   
+        a < b
+
+    where
+        a = findFirst xs zs
+        b = findFirst ys zs
+
+
+-- 2c
+myConcat can take a list that satisfies the Spec, but does not give the same result as (++). For example,
+let xs `concatImpl` ys = "abcbcde",
+but xs could be "ab" and ys could be "cb"
+
+
+
+
+-- 2d
+concatSpec concatImpl xs ys =
+    let zs = xs `concatImpl` ys
+    in before xs ys zs && (length xs + length ys) == length zs
+
+
+
+
+-- 3a
+combineLookup :: Ord k => (v -> v -> Maybe b) -> k -> k -> Map k v -> Maybe b
+combineLookup f k1 k2 kv = do
+    v1 <- lookup k1
+    v2 <- loopup k2
+    f v1 v2
+
+
+-- 3b
+main =
+    getArgs >>= (\(fp:h:_) ->
+    putStrLn h >>= (\_ ->
+    readFile fp >>= (\s ->
+    return (length s))))
+
+
+
+-- 3c
+log :: String -> Log ()
+log msg = 
+    do 
+        return (MkLog [msg] ())
+
+
+
+-- 3d
+instance Monad (Log a) where
+    return :: a -> Log a
+    return x = MkLog [] x
+
+
+    (>>=) :: Log a -> (a -> Log b) -> Log b
+    (>>=) (MkLog strings x) f = f x
+
+
+
+
+-- 3e
+withoutLogging :: Log a -> IO a
+withoutLogging (MkLog _ a) =
+    return a
+
+
+
+-- 5a
+A) WHNF cause constructor (:)
+B) not fully evaluated -> False
+C) WHNF cause lambda func
+D) not fully evaluated -> e
+E) WHNF -> function with missing arguments
+
+
+-- 5b
+C

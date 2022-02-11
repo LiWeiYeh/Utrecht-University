@@ -14,13 +14,14 @@ executable icalendar
   other-modules:        Calendar
                       , DateTime
                       , Features
+                      , ExampleObjects
 
   build-depends:       array,
                        base >=4.14,
                        boxes,
                        containers,
                        uu-tc == 2015.1.1
-
+                       
   hs-source-dirs:      src
 
   default-language:    Haskell2010

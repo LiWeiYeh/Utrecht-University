@@ -1,0 +1,107 @@
+-- 1a
+annotateMaybe :: (t-> a) -> Maybe t -> Maybe (a, t)
+annotateMaybe _ Nothing = Nothing
+annotateMaybe f (Just x) = Just (f x, x)
+
+annotateList :: (t -> a) -> [t] -> [(a, t)]
+annotateList _ [] = []
+annotateList f (x:xs) = (f x, x) : annotateList xs
+
+
+
+
+-- 1b
+annotate :: Functor f => (t -> a) -> f t -> f (a, t)
+annotate f = fmap (\x' -> (f x', x'))
+
+
+
+
+-- 1c
+No, cause it will give a cartesian product as a result
+
+
+
+-- 2a
+instance Crushable (Maybe a) where
+    crush Nothing = Nothing
+    crush (Just a) = a
+
+
+data Tree a = Leaf a | Node (Tree a) a (Tree a)
+
+instance Crushable (Tree a) where
+    crush (Leaf a) = a
+    -- (<>) appends the nodes to eachother
+    crush (Node l x r) = crush l <> x <> crush r
+
+
+
+
+-- 2b
+glength :: Crushable f => f a -> Integer
+glength x = unSum . crush . fmap (\_ -> Sum 1) x
+
+
+
+
+-- 2c
+data Tropical a = Value a | Infinite
+instance Ord a => Monoid (Tropical a) where
+    mempty = Infinite
+    (<>) (Value a) Infinite = Value a
+    (<>) Infinite (Value b) = Value b
+    (<>) (Value a) (Value b) = Value (min a b)
+
+
+
+
+
+
+-- 4a
+evalM :: Monad m => (v -> m Integer) -> ArithExpr v -> m Integer
+
+evalM f (Variable v) = f v
+evalM _ (Literal n) = return n
+evalM f (Add e1 e2) = do
+    e1' <- evalM f e1
+    e2' <- evalM f e2
+    return (e1' + e2')
+evalM f (Times e1 e2) = do
+    e1' <- evalM f e1
+    e2' <- evalM f e2
+    return (e1' * e2')
+
+
+
+-- 4b
+eval' :: Eq v => [(v, Integer)] -> ArithExpr v -> Maybe Integer
+eval' kv expr = 
+    k <- expr
+    lookup k kv
+
+
+eval' kv expr = 
+    evalM (\x -> lookup x kv) expr
+
+
+
+-- 4c
+data TrackAndFail v a = TF (Maybe a, Set v)
+
+return x = TrackAndFail (Just x, mempty)
+
+ 
+TF (Nothing, s1) >>= _ = TF (Nothing, s1)
+TF (Just x, s1) >>= f 
+    = let (TF (x', s2)) = f x
+      in TF (x', s1 <> s2)
+
+
+
+-- 4d
+prop (Literal v) = verb' (Literal v) == v
+
+
+
+

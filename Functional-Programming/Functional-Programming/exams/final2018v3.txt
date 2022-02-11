@@ -1,0 +1,59 @@
+-- 1a
+annotateMaybe _ Nothing = Nothing
+annotateMaybe f (Just x) = Just (f x, x)
+
+annotateList _ [] = []
+annotateList f xs = map (\x -> (f x, x)) xs
+
+
+
+-- 1b
+annotate f z = fmap (\x -> (f x, x)) z
+
+
+
+-- 1c
+no, the result of split lst gets a tuple. \
+then you bind each element of the tuple to ann and value,
+which then uses the cartesian product as a return value
+let anns = [1]
+let val = ['a', 'b']
+
+the result would then be [(1, 'a'), (1, 'b')]
+
+
+-- 2a
+instance Crushable (Maybe a) where
+    crush Nothing = Nothing
+    crush (Just x) = Just x
+
+instance Crushable (Tree a) where
+    crush Leaf a = Leaf a
+    crush (Node l x r) = crush l <> x <> crush r
+
+
+-- 2b
+glength xs =  unSum . crush . fmap (\x -> Sum 1) xs
+
+
+
+-- 2c
+instance Ord a => Monoid (Tropical a) where
+    mempty = Infinite 
+    (<>) (Value a) Infinite = Value a
+    (<>) Infinite (Value b) = Value b
+    (<>) (Value a) (Value b) = Value (min a b) 
+
+
+
+
+
+-- 4a
+evalM :: Monad m => (v -> m Integer) -> ArithExpr v -> m Integer
+evalM f (Variable v) = f v
+evalM _ (Literal n) = n
+evalM f (Add e1 e2) = do
+    e1' <- evalM f e1
+    e2' <- evalM f e2
+    return (e1' + e2')
+

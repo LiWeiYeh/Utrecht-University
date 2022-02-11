@@ -1,0 +1,6 @@
+	Bsr main
+	HALT
+main:
+	LINK 0
+	UNLINK
+	RET

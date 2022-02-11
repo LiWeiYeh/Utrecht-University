@@ -1,0 +1,24 @@
+	Bsr main
+	HALT
+main:
+	LINK 0
+	LDC 10
+	LDC 1
+	SUB
+	LDC 1
+	SUB
+	TRAP 0
+	AJS -1
+	LDC 2
+	LDC 3
+	SUB
+	LDS 0
+	LDL 1
+	STA 0
+	LDS 0
+	LDL 1
+	STA 0
+	TRAP 0
+	AJS -1
+	UNLINK
+	RET

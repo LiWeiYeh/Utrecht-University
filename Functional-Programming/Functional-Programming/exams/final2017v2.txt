@@ -1,0 +1,71 @@
+-- 1a
+
+instance Zippable Tree where
+    zip :: f a -> f b -> f (a, b)
+    zip Leaf _ = Leaf
+    zip _ Leaf = Leaf
+    zip (Node x1 l1 r1) (Node x2 l2 r2) =
+        Node ((zip l1 l2) (x1, x2) (zip r1 r2))
+
+
+
+-- 1b
+zipWith :: (Functor f, Zippable f) :: (a -> b -> c) -> f a -> f b -> f c
+zipWith f n1 n2 = fmap (uncurry f) (zip n1 n2)
+
+
+-- 1c
+No,
+let 
+    xs = [1, 2]
+    ys = ['a', 'b']
+
+    This gives a cartesian products of xs and ys.
+    e.g. [(1, 'a'), (1, 'b'), (2, 'a'), (2, 'b')]
+
+
+
+
+
+-- 3a
+propAddZeroIsExpr expr = eval (Add expr (Literal 0)) == eval expr
+propMultIsCommut expr1 expr2 = eval (Mult expr1 expr2) == eval (Mult expr2 expr1)
+
+
+
+
+-- 3b
+checkOptimizer e = eval e == eval $ opt e
+
+
+-- 3c
+instance Arbitrary Expr where
+    arbitrary = do
+        n <- arbitrary
+        e1 <- arbitrary
+        e2 <- arbitrary
+        elements [ Literal n, Add e1 e2, Mult e1 e2]
+
+
+-- 3d
+there's a possibility that the arbitrary set does not containt a Literal 0
+the solution is to make an arbitrary instance such that there is at least a Literal 0
+
+-- 4a
+instance Monad (Result e) where
+    return :: a -> Result e a
+    return = Ok
+
+    (>>=) :: Result e a -> (a -> Result e b) -> Result e b
+    x >>= f = case x of
+        (Fail e) -> Fail e
+        (Ok r)   -> f r
+
+    
+-- 4b
+tour [] = Fail "No towns to visit"
+tour [x] = give x
+tour (x:y:zs) = do
+    give x
+    travel x y
+    tour (y:zs)

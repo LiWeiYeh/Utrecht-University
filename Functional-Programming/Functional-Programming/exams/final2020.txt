@@ -1,0 +1,115 @@
+-- 1a
+dequeToList (One n) = [n]
+dequeToList (Two n1 n2) = [n1] ++ [n2]
+dequeToList (Single a) = flatten a 
+dequeToList (t1, t2) = [t1] ++ [t2]
+dequeToList (Multiple a1 d a2) = dequeToList a1 ++ dequeToList d ++ dequeToList a2
+
+
+
+
+-- 1b
+safeLast Empty = Nothing
+safeLast (Single a) = Just a
+
+
+
+
+-- 1c
+cons ele Empty = Single ele
+cons ele (Single a) = Multiple 
+whatthefuck?"!!"?$?
+
+
+instance Functor Deque where
+    fmap _ Empty = Empty
+    fmap f Single a = Single (f a)
+    fmap f Multiple l x r = Multiple (fmap f l) (fmap (\a b -> (f a, f b)) x) (fmap f r)
+
+
+-- 2a
+pf: flip bind const = id
+
+flip bind const x y
+= def i
+bind x const y
+= def h
+const (x y) y
+= def const
+x y
+= 
+x y
+= def e 
+id x y
+
+
+
+
+-- 2b
+pf: foldl2 = foldl
+
+let foldl2 = foldl2 op e [] AND foldl = foldl op e []
+foldl2 op e [] 
+= def foldl2 
+foldr (help op) id [] e
+=
+id e
+= 
+e
+= def foldl 
+foldl op e []
+
+
+
+-- 4a
+shuffle xs =
+    randomRIO (0, ----) >>= (\i -> 
+        let (pref, x, suf) = (extract i xs) in 
+            shuffle (pref ++ suf) >>= (\xs' ->
+                return (x:xs')))
+
+-- 4b
+foo :: IO Int'
+foo = do
+    
+
+
+
+-- 5a
+noMoreSpaces f thestring =
+    noMoreSpaces'
+    where
+        listedString = f thestring\
+        noMoreSpaces' [] = True
+        noMoreSpaces' ([]:ys) = noMoreSpaces ys
+        noMoreSpaces' ((x:xs):ys) | x == " " = False    
+                                  | otherwise = noMoreSpaces (xs:ys)
+
+
+
+
+-- 5b
+removeFinalSpaces string = reverse (dropWhile (== ' ') $ reverse string)
+
+
+-- 5c
+removeDuplicateSpaces (x:y:zs) =
+    case x of
+        " " -> if y == " "
+                    then removeDuplicateSpaces (y:zs)
+                    else x : removeDuplicateSpaces (y:zs)
+        _   -> x : removeDuplicateSpaces (y:zs)
+
+
+
+-- 5d
+
+
+
+
+6a -- a
+6b -- c
+
+-- 6c
+force :: [a] -> [a]
+force (x:y:ys) = 

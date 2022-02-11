@@ -1,0 +1,129 @@
+-- 1a
+instance Zippable Tree where
+    zip :: Tree a -> Tree b -> Tree (a, b)
+    zip Leaf _ = Leaf
+    zip _ Leaf = Leaf
+    zip (Node v l r) (Node v' l' r') =
+        Node (v, v') (zip l l') (zip r r')
+
+
+
+-- 1b
+zipWith f a b = 
+    fmap (uncurry f) (zip a b)
+
+
+
+-- 1c
+No, it creates a cartesian product.
+let xs = [1]
+    ys = ['a', 'b']
+->
+    this returns [(1, 'a'), (1, 'b')]
+whereas you want this to return [(1, 'a')]
+
+
+
+
+-- 2a
+pf: foldr (<>) e = foldr (<>) e . reverse
+    -> foldr (<>) e xs = foldr (<>) e . reverse xs
+
+
+let xs = []
+foldr (<>) e [] 
+= def a
+e
+= def a
+foldr (<>) e []
+= def c
+foldr (<>) e (reverse [])
+= def e
+foldr (<>) e . reverse []
+
+let xs = (z:zs)
+foldr (<>) e (z:zs)
+= def b
+z <> foldr (<>) e zs
+= 
+I.H.
+=
+z <> (foldr (<>) e . reverse zs)
+= def e
+z <> (foldr (<>) e (reverse zs))
+= def 4
+(foldr (<>) e (reverse zs)) <> z
+= def 2
+(foldr (<>) e (reverse zs)) <> (z <> e)
+= def a
+(foldr (<>) e (reverse zs)) <> (z <> foldr (<>) e [])
+= def b
+(foldr (<>) e (reverse zs)) <> (foldr (<>) e (z:[]))
+= def cons
+(foldr (<>) e (reverse zs)) <> (foldr (<>) e [z])
+= def lemma
+foldr (<>) e (reverse zs ++ [z])
+= def d
+foldr (<>) e (reverse (z:zs))
+= def e
+foldr (<>) e . reverse (z:zs)
+
+
+
+-- 3a
+addZero expr = eval expr == eval (Add expr (Literal 0))
+isCommMult e1 e2 = eval (Mult e1 e2) == eval (Mult e2 e1)
+
+
+
+
+-- 3b
+isSameResultOptimized e = eval e == eval (opt e)
+
+
+
+-- 3c
+instance Arbitrary Expr where
+    arbitrary = do
+        n <- arbitrary
+        e1 <- arbitrary
+        e2 <- arbitrary
+        elements [ Literal n
+                 , Add e1 e2
+                 , Mult e1 e2]
+
+
+
+
+-- 3d
+There's a chance that the arbitrary doesn't generate a Literal 0, so 
+it automatically isn't able to check.
+-> create a custom generator
+
+
+
+
+-- 4a
+return = Ok
+x >>= f = 
+    case x of
+        (Fail e) -> Fail e
+        (OK r) -> Ok (f r)
+
+
+
+
+-- 4b
+tour [] = Fail ".."
+tour [x] = give x
+your (x:y:zs) = do
+    give x
+    travel x y
+    tour (y:zs)
+
+
+-- 5a -- D
+
+-- 5b -- C
+
+-- 5c -- B
